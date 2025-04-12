@@ -559,6 +559,19 @@ storage_primary_access_key = <sensitive>
 
 c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>
 ```
+Then verified the created resources in Azure CLI:
+
+```python
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>terraform output resource_group_name
+"rg-dev-westeurope-vw"
+
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>az resource list --resource-group rg-dev-westeurope-vw --output table
+Name                   ResourceGroup         Location    Type                                        Status
+---------------------  --------------------  ----------  ------------------------------------------  --------
+       rg-  westeurope  Microsoft.Storage/storageAccounts
+  rg-  westeurope  Microsoft.ContainerService/managedClusters
+     rg- westeurope  Microsoft.ContainerRegistry/registries
+```
 
 
 
