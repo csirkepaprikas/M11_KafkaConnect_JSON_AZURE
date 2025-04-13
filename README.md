@@ -579,8 +579,36 @@ Also from the GUI:
 
 Then I headed to the Retrieve kubeconfig.yaml and Set It as Default steps, which contains so many sensitive informations, that I will display only franctions of it.
 I extracted kubeconfig.yaml from the directory /terraform:
- First I needed to recieve the current <AKS_NAME>, with command:
+
+First I needed to recieve the current <AKS_NAME>, with command:
  ```python terraform output -raw aks_name ```
+
+Then I needed to get <RESOURCE_GROUP_NAME_CREATED_BY_TERRAFORM>,with command:
+```python terraform output resource_group_name ```
+
+Next step was to set kubeconfig.yaml as Default for kubectl in Current Terminal Session:
+```python az aks get-credentials --resource-group <RESOURCE_GROUP_NAME_CREATED_BY_TERRAFORM> --name <AKS_NAME> ```
+
+Then switched to the project kubernetes namespace:
+```python kubectl config set-context --current --namespace confluent ```
+
+Verifed Kubernetes Cluster Connectivity:
+
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>kubectl get nodes
+```python
+NAME                              STATUS   ROLES    AGE   VERSION
+aks--vmss   Ready    <none>   13h   v1.30.10
+```
+Then installed Confluent for Kubernetes:
+```python
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>helm repo add confluentinc https://packages.confluent.io/helm
+"confluentinc" has been added to your repositories
+
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "confluentinc" chart repository
+Update Complete. ⎈Happy Helming!⎈
+```
 
 
 
