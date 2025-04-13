@@ -609,6 +609,133 @@ Hang tight while we grab the latest from your chart repositories...
 ...Successfully got an update from the "confluentinc" chart repository
 Update Complete. ⎈Happy Helming!⎈
 ```
+Installed Confluent for Kubernetes:
+
+```python
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+Release "confluent-operator" does not exist. Installing it now.
+NAME: confluent-operator
+LAST DEPLOYED: Sun Apr 13 10:34:14 2025
+NAMESPACE: confluent
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+The Confluent Operator
+
+The Confluent Operator brings the component (Confluent Services) specific controllers for kubernetes by providing components specific Custom Resource
+Definition (CRD) as well as managing other Confluent Platform services
+```
+
+### Configure and Use Azure Container Registry (ACR)
+Azure Container Registry (ACR) is used to store container images before deploying them to AKS.
+
+Got the <ACR_NAME> run the following command:
+```python terraform output acr_login_server ```
+
+Authenticated with ACR.
+```python
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>az acr login --name acr.azurecr.io
+The login server endpoint suffix '.azurecr.io' is automatically omitted.
+Login Succeeded
+```
+### Build and push azure-connector into ACR
+Navigated into folder connectors/, dind't modify the docker file.
+Then started the docker image building with command:
+```python docker build -t <ACR_NAME>/azure-connector:latest . ```
+
+```python
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\connectors>docker build -t ar.io/azure-connector:latest .
+[+] Building 404.1s (7/7) FINISHED                                                                                                                                                          docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.1s
+ => => transferring dockerfile: 305B                                                                                                                                                                        0.0s
+ => [internal] load metadata for docker.io/confluentinc/cp-server-connect:7.8.1                                                                                                                             2.4s
+ => [internal] load .dockerignore                                                                                                                                                                           0.1s
+ => => transferring context: 2B                                                                                                                                                                             0.0s
+ => [1/3] FROM docker.io/confluentinc/cp-server-connect:7.8.1@sha256:4e979451cb241d7f7c42ca3c525c7d64de89cfae736866a0cffdd15e2e1f0771                                                                     367.6s
+ => => resolve docker.io/confluentinc/cp-server-connect:7.8.1@sha256:4e979451cb241d7f7c42ca3c525c7d64de89cfae736866a0cffdd15e2e1f0771                                                                       0.1s
+ => => sha256:336371b9729357846d5bfddfe20ffea467a48b6c7a08b58e9e942d5208fdc4dc 2.80kB / 2.80kB                                                                                                              0.5s
+ => => sha256:2b2d929716aac24d9218f33a5f7eefbaac75095f5bb9241d229acf99076efc31 824.94MB / 824.94MB                                                                                                        261.0s
+ => => sha256:ee7b8ffc4e419868ca34fead8b96f0c2650af221bdc00c91880ff849481a51d4 3.68kB / 3.68kB                                                                                                              1.2s
+ => => sha256:2cc7ca19c613a064c8a0819dd40a2a0bce9ad4b1581725fdddcaf033f137904e 1.30GB / 1.30GB                                                                                                            339.1s
+ => => sha256:2f0f985c5c23d229639da95b5a9939cce3381d19fd07396fe5bcdfbfdee9d336 230.63kB / 230.63kB                                                                                                          0.6s
+ => => sha256:94e1268754549008e561b35771c9a88c305e70de53860bb5d67f967ab516104e 172B / 172B                                                                                                                  0.3s
+ => => sha256:68ceef9da5a7682e54435d6e435ebbf33a70a74866bb98ca425369389fc13e4d 98B / 98B                                                                                                                    0.5s
+ => => sha256:cb8946e92e4ab58e9a63612df4d8f391f3805b7b5a6b4dd4a2bab5f4fff9909f 852B / 852B                                                                                                                  0.5s
+ => => sha256:bb6547389ecb4fa892b1a143bc6c466e8673edf27a74ce22e19300fb44bd15eb 1.11kB / 1.11kB                                                                                                              0.5s
+ => => sha256:67456fbe3f6a7650de1a7c735f64debea796bb56693c170f1d0b7275dd8c909b 4.66kB / 4.66kB                                                                                                              0.7s
+ => => sha256:5a94f3d6b236fbdb13be7c372f8bbbe3400dd6862609d19811030f5793905c73 43.63MB / 43.63MB                                                                                                           23.3s
+ => => sha256:86718234a593b8ad5c9c62b29e754caa1d7fe0bf8ee9d7eafefaacc01ba80fd8 21.39kB / 21.39kB                                                                                                            0.9s
+ => => sha256:74af2f65710b4faaf30fd441be924486082bb7c2e1c0200e4019afcf59b788a4 8.68MB / 8.68MB                                                                                                              4.6s
+ => => sha256:48194843822a5013a9d9eb3949635f5d7edfe9490165d6b225e19bb4b421d327 1.10kB / 1.10kB                                                                                                              0.5s
+ => => sha256:65685005b2b1e0ec8f555e02e2435dc1deecc821767c13d3015911502d95b0eb 276B / 276B                                                                                                                  0.6s
+ => => extracting sha256:65685005b2b1e0ec8f555e02e2435dc1deecc821767c13d3015911502d95b0eb                                                                                                                   0.1s
+ => => sha256:8efbca1eae4bf33d69bd819ca7afe2211e6a22728a01c36f78394dda0ed97689 373.47MB / 373.47MB                                                                                                        120.5s
+ => => extracting sha256:8efbca1eae4bf33d69bd819ca7afe2211e6a22728a01c36f78394dda0ed97689                                                                                                                  60.0s
+ => => extracting sha256:48194843822a5013a9d9eb3949635f5d7edfe9490165d6b225e19bb4b421d327                                                                                                                   0.1s
+ => => extracting sha256:74af2f65710b4faaf30fd441be924486082bb7c2e1c0200e4019afcf59b788a4                                                                                                                   0.5s
+ => => extracting sha256:86718234a593b8ad5c9c62b29e754caa1d7fe0bf8ee9d7eafefaacc01ba80fd8                                                                                                                   0.1s
+ => => extracting sha256:5a94f3d6b236fbdb13be7c372f8bbbe3400dd6862609d19811030f5793905c73                                                                                                                   2.2s
+ => => extracting sha256:67456fbe3f6a7650de1a7c735f64debea796bb56693c170f1d0b7275dd8c909b                                                                                                                   0.1s
+ => => extracting sha256:bb6547389ecb4fa892b1a143bc6c466e8673edf27a74ce22e19300fb44bd15eb                                                                                                                   0.1s
+ => => extracting sha256:cb8946e92e4ab58e9a63612df4d8f391f3805b7b5a6b4dd4a2bab5f4fff9909f                                                                                                                   0.1s
+ => => extracting sha256:68ceef9da5a7682e54435d6e435ebbf33a70a74866bb98ca425369389fc13e4d                                                                                                                   0.2s
+ => => extracting sha256:94e1268754549008e561b35771c9a88c305e70de53860bb5d67f967ab516104e                                                                                                                   0.1s
+ => => extracting sha256:2f0f985c5c23d229639da95b5a9939cce3381d19fd07396fe5bcdfbfdee9d336                                                                                                                   0.2s
+ => => extracting sha256:2cc7ca19c613a064c8a0819dd40a2a0bce9ad4b1581725fdddcaf033f137904e                                                                                                                  19.0s
+ => => extracting sha256:ee7b8ffc4e419868ca34fead8b96f0c2650af221bdc00c91880ff849481a51d4                                                                                                                   0.0s
+ => => extracting sha256:2b2d929716aac24d9218f33a5f7eefbaac75095f5bb9241d229acf99076efc31                                                                                                                   8.7s
+ => => extracting sha256:336371b9729357846d5bfddfe20ffea467a48b6c7a08b58e9e942d5208fdc4dc                                                                                                                   0.0s
+ => [2/3] RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage:1.6.24                                                                                                       13.2s
+ => [3/3] RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage-source:2.6.10                                                                                                10.0s
+ => exporting to image                                                                                                                                                                                     10.2s
+ => => exporting layers                                                                                                                                                                                     7.3s
+ => => exporting manifest sha256:0060d95f1b49967bdf8de1d1d0de6b5f89b6948ac6bc14d5fa22c43a36ffa043                                                                                                           0.0s
+ => => exporting config sha256:dd79205add1788ab50616652a228a8ffb4ff860f87dc5654e4171f347ff729bf                                                                                                             0.0s
+ => => exporting attestation manifest sha256:ae025f67039e2ecc634e520f8326be4d58224a05c3f6af39c6cb91adba485f9f                                                                                               0.1s
+ => => exporting manifest list sha256:b8140cc2b0a46ee02f7ff7022b9876e38c9f68b9a97b7b66d79a2d1f41948161                                                                                                      0.0s
+ => => naming to acr.azurecr.io/azure-connector:latest                                                                                                                                       0.0s
+ => => unpacking to acr.azurecr.io/azure-connector:latest                                                                                                                                    2.6s
+```
+
+Then pushed the image to the ACR:
+```python
+
+```
+
+Finally verified the image in ACR:
+```python
+
+```
+
+### Install Confluent Platform
+
+Navigated into root folder. Modifed the file confluent-platform.yaml and replaced the placeholder with actual value.
+Installed all Confluent Platform components:
+```python
+
+```
+
+Installed a sample producer app and topic:
+```python
+
+```
+
+Checked that everything is deployed (all pods should be in the Running state and have a ready status of 1/1):
+It took approximately 15–20 minutes to set up all resources.
+
+### View Control Center
+
+Set up port forwarding to Control Center web UI from local machine:
+
+### Create a kafka topic
+The topic should had at least 3 partitions because the azure blob storage had 3 partitions. Named the new topic: expedia.
+
+Created a connection for kafka:
+
+Executed below command to create Kafka topic with a name expedia:
+
+### Upload the data files into Azure Conatainers
 
 
 
