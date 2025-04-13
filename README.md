@@ -573,5 +573,17 @@ Name                   ResourceGroup         Location    Type                   
      rg- westeurope  Microsoft.ContainerRegistry/registries
 ```
 
+Also from the GUI:
+
+![new_rgs_gui](https://github.com/user-attachments/assets/857b0a8d-a2f5-427b-8718-bf3eb6240f08)
+
+Then I headed to the Retrieve kubeconfig.yaml and Set It as Default steps, which contains so many sensitive informations, that I will display only franctions of it.
+I extracted kubeconfig.yaml from the directory /terraform:
+ First I needed to recieve the current <AKS_NAME>, with command:
+ ```python terraform output -raw aks_name ```
+
+
+
+
 
 
