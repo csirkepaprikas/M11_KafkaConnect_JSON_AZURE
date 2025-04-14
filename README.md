@@ -779,14 +779,22 @@ zookeeper-2                           1/1     Running   0             10h   10.2
 ### View Control Center
 
 Set up port forwarding to Control Center web UI from local machine:
+```python Start-Process powershell -WindowStyle Hidden -ArgumentList 'kubectl port-forward controlcenter-0 9021:9021 *> $null' ```
+
+![contcent](https://github.com/user-attachments/assets/84c83696-fc9e-4441-b368-b66e3007a6f9)
 
 ### Create a kafka topic
 The topic should had at least 3 partitions because the azure blob storage had 3 partitions. Named the new topic: expedia.
 
 Created a connection for kafka:
+```python Start-Process powershell -WindowStyle Hidden -ArgumentList 'kubectl port-forward connect-0 8083:8083 *> $null' ```
 
 Executed below command to create Kafka topic with a name expedia:
-
+```python
+PS C:\WINDOWS\system32>
+>> kubectl exec kafka-0 -c kafka -- bash -c "/usr/bin/kafka-topics --create --topic expedia --replication-factor 3 --partitions 3 --bootstrap-server kafka:9092"
+Created topic expedia.
+```
 ### Upload the data files into Azure Conatainers
 
 
