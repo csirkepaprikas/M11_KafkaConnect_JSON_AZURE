@@ -700,12 +700,39 @@ c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\connectors>docker build -
 
 Then pushed the image to the ACR:
 ```python
-
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\connectors>docker push acr.azurecr.io/azure-connector
+Using default tag: latest
+The push refers to repository [acr.azurecr.io/azure-connector]
+29118dc2a558: Pushed
+68ceef9da5a7: Pushed
+86718234a593: Pushed
+67456fbe3f6a: Pushed
+bb6547389ecb: Pushed
+cb8946e92e4a: Pushed
+ee7b8ffc4e41: Pushed
+4fe015fb031e: Pushed
+74af2f65710b: Pushed
+94e126875454: Pushed
+2f0f985c5c23: Pushed
+2cc7ca19c613: Pushed
+65685005b2b1: Pushed
+5a94f3d6b236: Pushed
+48194843822a: Pushed
+336371b97293: Pushed
+8efbca1eae4b: Pushed
+16ea687fd8de: Pushed
+0c03fc0a30d2: Pushed
+2b2d929716aa: Pushed
+latest: digest: sha256:b8140cc2b0a46ee02f7ff7022b9876e38c9f68b9a97b7b66d79a2d1f41948161 size: 856
 ```
 
 Finally verified the image in ACR:
 ```python
-
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\connectors>az acr repository list --name acr.azurecr.io --output table
+The login server endpoint suffix '.azurecr.io' is automatically omitted.
+Result
+---------------
+azure-connector
 ```
 
 ### Install Confluent Platform
@@ -713,17 +740,42 @@ Finally verified the image in ACR:
 Navigated into root folder. Modifed the file confluent-platform.yaml and replaced the placeholder with actual value.
 Installed all Confluent Platform components:
 ```python
-
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master>kubectl apply -f confluent-platform.yaml
+zookeeper.platform.confluent.io/zookeeper created
+kafka.platform.confluent.io/kafka created
+connect.platform.confluent.io/connect created
+ksqldb.platform.confluent.io/ksqldb created
+controlcenter.platform.confluent.io/controlcenter created
+schemaregistry.platform.confluent.io/schemaregistry created
 ```
 
 Installed a sample producer app and topic:
 ```python
-
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master>kubectl apply -f producer-app-data.yaml
+secret/kafka-client-config created
+statefulset.apps/elastic created
+service/elastic created
+kafkatopic.platform.confluent.io/elastic-0 created
 ```
 
 Checked that everything is deployed (all pods should be in the Running state and have a ready status of 1/1):
-It took approximately 15–20 minutes to set up all resources.
-
+It took approximately 10 minutes to set up all resources.
+```python
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master>kubectl get pods -o wide
+NAME                                  READY   STATUS    RESTARTS      AGE   IP             NODE                              NOMINATED NODE   READINESS GATES
+confluent-operator-7bc56ff8bf-8pxcr   1/1     Running   0             10h   10.244.0.230   aks-default-17594787-vmss000000   <none>           <none>
+connect-0                             1/1     Running   0             10h   10.244.0.72    aks-default-17594787-vmss000000   <none>           <none>
+controlcenter-0                       1/1     Running   1 (16m ago)   10h   10.244.0.152   aks-default-17594787-vmss000000   <none>           <none>
+elastic-0                             1/1     Running   0             10h   10.244.0.192   aks-default-17594787-vmss000000   <none>           <none>
+kafka-0                               1/1     Running   1 (17m ago)   10h   10.244.0.237   aks-default-17594787-vmss000000   <none>           <none>
+kafka-1                               1/1     Running   1 (17m ago)   10h   10.244.0.153   aks-default-17594787-vmss000000   <none>           <none>
+kafka-2                               1/1     Running   1 (17m ago)   10h   10.244.0.44    aks-default-17594787-vmss000000   <none>           <none>
+ksqldb-0                              1/1     Running   1 (17m ago)   10h   10.244.0.198   aks-default-17594787-vmss000000   <none>           <none>
+schemaregistry-0                      1/1     Running   1 (17m ago)   10h   10.244.0.199   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-0                           1/1     Running   0             10h   10.244.0.190   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-1                           1/1     Running   0             10h   10.244.0.216   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-2                           1/1     Running   0             10h   10.244.0.156   aks-default-17594787-vmss000000   <none>           <none>
+```
 ### View Control Center
 
 Set up port forwarding to Control Center web UI from local machine:
