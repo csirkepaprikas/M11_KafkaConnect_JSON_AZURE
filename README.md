@@ -797,7 +797,80 @@ Created topic expedia.
 ```
 ### Upload the data files into Azure Conatainers
 
+I created them according the instruction, preserving the original directory structure:
 
+![exp_dire](https://github.com/user-attachments/assets/fba08303-8c55-436c-a6cc-341b78dfbe9c)
+
+![cont_part_dire](https://github.com/user-attachments/assets/97650989-b533-4ec6-ba5b-2a42ad529212)
+
+
+### Prepare the azure connector configuration file
+
+Modified the file /terraform/azure-source-cc.json.
+
+Before the data uploading I had to mask time from the date field using MaskField transformer like: 2015-08-18 12:37:10 -> 0000-00-00 00:00:00.
+
+For this I printed out the name of the columns and also the first 5 rows, to check the structure of the data.
+For this purpose I used the python code below:
+```python
+from fastavro import reader
+
+
+def read_avro_file(file_path):
+    with open(file_path, 'rb') as f:
+        avro_reader = reader(f)
+
+        # Oszlopnevek kiolvasása a schema alapján
+        schema_fields = avro_reader.schema['fields']
+        column_names = [field['name'] for field in schema_fields]
+
+        print("columns:")
+        for name in column_names:
+            print(f"- {name}")
+
+        print("\nfirst 5 rows:")
+        for i, record in enumerate(avro_reader):
+            print(record)
+            if i == 4:
+                break
+
+
+avro_file_path = "c:/data_eng/házi/5/m11kafkaconnect/topics/expedia/partition=1/expedia+1+0000000000.avro"
+read_avro_file(avro_file_path)
+```
+The output was:
+```python
+columns:
+- id
+- date_time
+- site_name
+- posa_container
+- user_location_country
+- user_location_region
+- user_location_city
+- orig_destination_distance
+- user_id
+- is_mobile
+- is_package
+- channel
+- srch_ci
+- srch_co
+- srch_adults_cnt
+- srch_children_cnt
+- srch_rm_cnt
+- srch_destination_id
+- srch_destination_type_id
+- hotel_id
+
+first 5 rows:
+{'id': 2182172, 'date_time': '2015-09-22 15:22:02', 'site_name': 2, 'posa_container': None, 'user_location_country': 66, 'user_location_region': 226, 'user_location_city': 45115, 'orig_destination_distance': 2144.2684, 'user_id': 46170, 'is_mobile': 0, 'is_package': 0, 'channel': 10, 'srch_ci': '2017-08-07', 'srch_co': '2017-08-11', 'srch_adults_cnt': 2, 'srch_children_cnt': 1, 'srch_rm_cnt': 1, 'srch_destination_id': 12826, 'srch_destination_type_id': 5, 'hotel_id': 2156073582601}
+{'id': 2182202, 'date_time': '2015-02-10 13:11:46', 'site_name': 2, 'posa_container': None, 'user_location_country': 66, 'user_location_region': 442, 'user_location_city': 9891, 'orig_destination_distance': 628.387, 'user_id': 46266, 'is_mobile': 1, 'is_package': 0, 'channel': 9, 'srch_ci': '2017-08-10', 'srch_co': '2017-08-12', 'srch_adults_cnt': 1, 'srch_children_cnt': 0, 'srch_rm_cnt': 1, 'srch_destination_id': 27725, 'srch_destination_type_id': 6, 'hotel_id': 137438953474}
+{'id': 2182216, 'date_time': '2015-10-23 15:51:49', 'site_name': 2, 'posa_container': None, 'user_location_country': 66, 'user_location_region': 462, 'user_location_city': 27117, 'orig_destination_distance': 145.4714, 'user_id': 46355, 'is_mobile': 0, 'is_package': 0, 'channel': 10, 'srch_ci': '2017-08-24', 'srch_co': '2017-08-25', 'srch_adults_cnt': 4, 'srch_children_cnt': 0, 'srch_rm_cnt': 1, 'srch_destination_id': 23545, 'srch_destination_type_id': 6, 'hotel_id': 2173253451781}
+{'id': 2182238, 'date_time': '2015-05-06 05:41:13', 'site_name': 34, 'posa_container': None, 'user_location_country': 205, 'user_location_region': 385, 'user_location_city': 46963, 'orig_destination_distance': 327.4224, 'user_id': 46472, 'is_mobile': 0, 'is_package': 0, 'channel': 10, 'srch_ci': '2016-10-27', 'srch_co': '2016-10-31', 'srch_adults_cnt': 2, 'srch_children_cnt': 0, 'srch_rm_cnt': 1, 'srch_destination_id': 8267, 'srch_destination_type_id': 1, 'hotel_id': 2473901162497}
+{'id': 2182270, 'date_time': '2015-11-01 08:09:41', 'site_name': 2, 'posa_container': None, 'user_location_country': 66, 'user_location_region': 258, 'user_location_city': 6176, 'orig_destination_distance': 1718.7233, 'user_id': 46599, 'is_mobile': 0, 'is_package': 1, 'channel': 10, 'srch_ci': '2017-08-24', 'srch_co': '2017-08-28', 'srch_adults_cnt': 2, 'srch_children_cnt': 2, 'srch_rm_cnt': 1, 'srch_destination_id': 8254, 'srch_destination_type_id': 1, 'hotel_id': 1941325217794}
+
+Process finished with exit code 0
+```
 
 
 
