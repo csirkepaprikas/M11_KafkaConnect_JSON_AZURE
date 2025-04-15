@@ -873,6 +873,74 @@ Process finished with exit code 0
 ```
 From the output it was clear, that I had to mask the second, "date_time" column.
 
+At this point I learned the name what to mask, so I modified the json according to that (sensitive information were deleted):
+```python
+{
+"name": "expedia",
+  "config": {
+    "topics": "expedia",
+    "bootstrap.servers": "kafka:9071",
+    "connector.class": "io.confluent.connect.azure.blob.storage.AzureBlobStorageSourceConnector",
+    "tasks.max": "2",
+    "topics.dir": "root",
+    "format.class": "io.confluent.connect.azure.blob.storage.format.avro.AvroFormat",
+    "azblob.account.name": "dev",
+    "azblob.account.key": "",
+    "azblob.container.name": "data",
+    "azblob.retry.retries": "3",
+    "transforms": "mask_date",
+    "transforms.mask_date.type": "org.apache.kafka.connect.transforms.MaskField$Value",
+    "transforms.mask_date.fields": "date_time",
+    "transforms.mask_date.replacement": "0000-00-00 00:00:00"
+  }
+}
+```
+
+### Upload the connector file through the API
+
+Went into folder terraform, and run a command:
+```python Remove-item alias:curl ```
+Then the next one to upload the connector: 
+```python
+>> curl -s -X POST -H "Content-Type:application/json" --data @azure-source-cc.json http://localhost:8083/connectors
+{"name":"expedia","config":{"topics":"expedia","bootstrap.servers":"kafka:9071","connector.class":"io.confluent.connect.azure.blob.storage.AzureBlobStorageSourceConnector","tasks.max":"2","topics.dir":"root","format.class":"io.confluent.connect.azure.blob.storage.format.avro.AvroFormat","azblob.account.name":"dev","azblob.account.key":"","azblob.container.name":"data","azblob.retry.retries":"3","transforms":"mask_date","transforms.mask_date.type":"org.apache.kafka.connect.transforms.MaskField$Value","transforms.mask_date.fields":"date_time","transforms.mask_date.replacement":"0000-00-00 00:00:00","name":"expedia"},"tasks":[],"type":"source"}
+```
+
+### Verify the messages in Kafka
+
+Browsed the Control Center on http://localhost:9021 and navigated to the Topics, chose the named "expedia" and checked the incoming messages:
+
+![inc_messages](https://github.com/user-attachments/assets/612feb65-e64f-4492-932f-122812818455)
+
+Then an actual message:
+```python
+{
+  "id": 649959,
+  "date_time": "0000-00-00 00:00:00",
+  "site_name": 34,
+  "posa_container": null,
+  "user_location_country": 205,
+  "user_location_region": 354,
+  "user_location_city": 33452,
+  "orig_destination_distance": 340.937,
+  "user_id": 960741,
+  "is_mobile": 0,
+  "is_package": 0,
+  "channel": 9,
+  "srch_ci": "2017-08-18",
+  "srch_co": "2017-08-19",
+  "srch_adults_cnt": 5,
+  "srch_children_cnt": 0,
+  "srch_rm_cnt": 3,
+  "srch_destination_id": 8233,
+  "srch_destination_type_id": 1,
+  "hotel_id": 1082331758594
+}
+```
+As You can see the "date_time" column was successfully masked.
+
+
+
 
 
 
