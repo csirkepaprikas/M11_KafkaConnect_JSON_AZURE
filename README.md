@@ -871,6 +871,7 @@ first 5 rows:
 
 Process finished with exit code 0
 ```
+From the output it was clear, that I had to mask the second, "date_time" column.
 
 
 
