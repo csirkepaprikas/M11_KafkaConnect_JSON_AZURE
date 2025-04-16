@@ -496,7 +496,7 @@ Releasing state lock. This may take a few moments...
 c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>terraform apply terraform.plan
 Acquiring state lock. This may take a few moments...
 random_string.suffix: Creating...
-random_string.suffix: Creation complete after 0s [id=vw]
+random_string.suffix: Creation complete after 0s [id=]
 azurerm_resource_group.bdcc: Creating...
 azurerm_resource_group.bdcc: Still creating... [10s elapsed]
 azurerm_resource_group.bdcc: Creation complete after 10s [id=/subscriptions/]
@@ -523,7 +523,7 @@ data.azurerm_storage_account.storage: Reading...
 azurerm_storage_data_lake_gen2_filesystem.gen2_data: Creating...
 data.azurerm_storage_account.storage: Read complete after 1s [id=/subscriptions/]
 azurerm_kubernetes_cluster.bdcc: Still creating... [1m10s elapsed]
-azurerm_storage_data_lake_gen2_filesystem.gen2_data: Creation complete after 1s [id=https://devwesteuropevw.dfs.core.windows.net/data]
+azurerm_storage_data_lake_gen2_filesystem.gen2_data: Creation complete after 1s [id=https://dedfs.core.windows.net/data]
 local_file.azure_connector_config: Creating...
 local_file.azure_connector_config: Creation complete after 0s [id=c9]
 azurerm_kubernetes_cluster.bdcc: Still creating... [1m20s elapsed]
@@ -536,7 +536,7 @@ azurerm_kubernetes_cluster.bdcc: Still creating... [2m20s elapsed]
 azurerm_kubernetes_cluster.bdcc: Still creating... [2m30s elapsed]
 azurerm_kubernetes_cluster.bdcc: Still creating... [2m40s elapsed]
 azurerm_kubernetes_cluster.bdcc: Still creating... [2m50s elapsed]
-azurerm_kubernetes_cluster.bdcc: Creation complete after 2m59s [id=/subscriptions/urope-vw]
+azurerm_kubernetes_cluster.bdcc: Creation complete after 2m59s [id=/subscriptions
 azurerm_role_assignment._acr_pull: Creating...
 kubernetes_namespace.confluent: Creating...
 kubernetes_namespace.confluent: Creation complete after 1s [id=confluent]
@@ -548,13 +548,13 @@ Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-acr_login_server = "acrdevwesteuropevw.azurecr.io"
+acr_login_server = ".azurecr.io"
 aks_api_server_url = <sensitive>
 aks_kubeconfig = <sensitive>
-aks_name = "aks-dev-westeurope-vw"
+aks_name = "aks"
 client_certificate = <sensitive>
-resource_group_name = "rg-dev-westeurope-vw"
-storage_account_name = "devwesteuropevw"
+resource_group_name = "rg-dev"
+storage_account_name = "de"
 storage_primary_access_key = <sensitive>
 
 c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>
@@ -563,9 +563,9 @@ Then verified the created resources in Azure CLI:
 
 ```python
 c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>terraform output resource_group_name
-"rg-dev-westeurope-vw"
+"r"
 
-c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>az resource list --resource-group rg-dev-westeurope-vw --output table
+c:\data_eng\házi\5\m11_kafkaconnect_json_azure-master\terraform>az resource list --resource-group rg --output table
 Name                   ResourceGroup         Location    Type                                        Status
 ---------------------  --------------------  ----------  ------------------------------------------  --------
        rg-  westeurope  Microsoft.Storage/storageAccounts
