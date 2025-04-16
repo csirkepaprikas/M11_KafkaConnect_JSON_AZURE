@@ -537,7 +537,7 @@ azurerm_kubernetes_cluster.bdcc: Still creating... [2m30s elapsed]
 azurerm_kubernetes_cluster.bdcc: Still creating... [2m40s elapsed]
 azurerm_kubernetes_cluster.bdcc: Still creating... [2m50s elapsed]
 azurerm_kubernetes_cluster.bdcc: Creation complete after 2m59s [id=/subscriptions/urope-vw]
-azurerm_role_assignment.aks_acr_pull: Creating...
+azurerm_role_assignment._acr_pull: Creating...
 kubernetes_namespace.confluent: Creating...
 kubernetes_namespace.confluent: Creation complete after 1s [id=confluent]
 azurerm_role_assignment.aks_acr_pull: Still creating... [10s elapsed]
@@ -1023,6 +1023,268 @@ fix-curl:
 # 5. Kafka Connect connector upload from JSON file
 upload-connector:
 	powershell -Command "curl -s -X POST -H 'Content-Type:application/json' --data @azure-source-cc.json http://localhost:8083/connectors"
+```
+
+I deleted/masked the sensitive informations in the outputs/screenshots.
+
+### upload-dir:
+This target uploads the connectors data.
+```python
+PS C:\data_eng\házi\5\ci_cd> make upload-dir
+az storage blob upload-batch \
+        --account-name  \
+        --destination data \
+        --source . \
+        --pattern "root_cicd/*"
+
+There are no credentials provided in your command and environment, we will query for account key for your storage account.
+It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
+
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://learn.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
+
+In addition, setting the corresponding environment variables can avoid inputting credentials in your command. Please use --help to get more information about environment variable usage.
+Finished[#############################################################]  100.0000%
+[
+  {
+    "Blob": "https://d.blob.core.windows.net/data/root_cicd/topics/expedia/partition%3D0/expedia%2B0%2B0000000000.avro",
+    "Last Modified": "2025-04-16T11:25:50+00:00",
+    "Type": null,
+    "eTag": "\"0x8DD7CD97101603C\""
+  },
+  {
+    "Blob": "https://d.blob.core.windows.net/data/root_cicd/topics/expedia/partition%3D1/expedia%2B1%2B0000000000.avro",
+    "Last Modified": "2025-04-16T11:26:23+00:00",
+    "Type": null,
+    "eTag": "\"0x8DD7CD984C51FC4\""
+  },
+  {
+    "Blob": "https://d.blob.core.windows.net/data/root_cicd/topics/expedia/partition%3D2/expedia%2B2%2B0000000000.avro",
+    "Last Modified": "2025-04-16T11:27:05+00:00",
+    "Type": null,
+    "eTag": "\"0x8DD7CD99E0BEBF8\""
+  }
+]
+```
+
+![ci_datas](https://github.com/user-attachments/assets/2c5b0b8a-6aff-4d2c-a9a5-67eae39241a6)
+
+### build:
+
+This target build the docker image locally:
+```python
+PS C:\data_eng\házi\5\ci_cd> make build
+docker build -t .azurecr.io/azure-connector:latest .
+[+] Building 2.4s (7/7) FINISHED                                                                                                                                                            docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.1s
+ => => transferring dockerfile: 306B                                                                                                                                                                        0.0s
+ => [internal] load metadata for docker.io/confluentinc/cp-server-connect:7.6.0                                                                                                                             1.6s
+ => [internal] load .dockerignore                                                                                                                                                                           0.1s
+ => => transferring context: 2B                                                                                                                                                                             0.0s
+ => [1/3] FROM docker.io/confluentinc/cp-server-connect:7.6.0@sha256:0bf9b70cc89a2dcdd9c57d2d92129dfbb012690a3323f4c4e92d1505c8c2ea4d                                                                       0.1s
+ => => resolve docker.io/confluentinc/cp-server-connect:7.6.0@sha256:0bf9b70cc89a2dcdd9c57d2d92129dfbb012690a3323f4c4e92d1505c8c2ea4d                                                                       0.1s
+ => CACHED [2/3] RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage:latest                                                                                                 0.0s
+ => CACHED [3/3] RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage-source:latest                                                                                          0.0s
+ => exporting to image                                                                                                                                                                                      0.3s
+ => => exporting layers                                                                                                                                                                                     0.0s
+ => => exporting manifest sha256:87ca0260cfdcd056f267803844e8749ad2ae16bb7d141870111626f432d97bfe                                                                                                           0.0s
+ => => exporting config sha256:375d7db90c39b010366d8ee41dfd26469afd5e94c2672f4008568edf5e5ba1b5                                                                                                             0.0s
+ => => exporting attestation manifest sha256:c4c69785d06f74124ac3161209b58b8b6615d3d1d51ea83edfc2ef989cd1bb11                                                                                               0.1s
+ => => exporting manifest list sha256:3a597abe5935449a4e06c06aead0f515646c6ec71b376627c00279717e387690                                                                                                      0.0s
+ => => naming to a.azurecr.io/azure-connector:latest                                                                                                                                 0.0s
+ => => unpacking to .azurecr.io/azure-connector:latest                                                                                                                              0.0s
+PS C:\data_eng\házi\5\ci_cd>
+```
+
+### login:
+
+This target executes a login to the ACR:
+```python
+PS C:\data_eng\házi\5\ci_cd> make login
+az acr login --name acr
+Login Succeeded
+PS C:\data_eng\házi\5\ci_cd>
+```
+### push:
+
+This target pushes the image to the ACR:
+```python
+PS C:\data_eng\házi\5\ci_cd> make push
+docker build -t acr.azurecr.io/azure-connector:latest .
+[+] Building 1.8s (7/7) FINISHED                                                                                                                                                            docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.0s
+ => => transferring dockerfile: 306B                                                                                                                                                                        0.0s
+ => [internal] load metadata for docker.io/confluentinc/cp-server-connect:7.6.0                                                                                                                             1.1s
+ => [internal] load .dockerignore                                                                                                                                                                           0.1s
+ => => transferring context: 2B                                                                                                                                                                             0.0s
+ => [1/3] FROM docker.io/confluentinc/cp-server-connect:7.6.0@sha256:0bf9b70cc89a2dcdd9c57d2d92129dfbb012690a3323f4c4e92d1505c8c2ea4d                                                                       0.1s
+ => => resolve docker.io/confluentinc/cp-server-connect:7.6.0@sha256:0bf9b70cc89a2dcdd9c57d2d92129dfbb012690a3323f4c4e92d1505c8c2ea4d                                                                       0.0s
+ => CACHED [2/3] RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage:latest                                                                                                 0.0s
+ => CACHED [3/3] RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage-source:latest                                                                                          0.0s
+ => exporting to image                                                                                                                                                                                      0.2s
+ => => exporting layers                                                                                                                                                                                     0.0s
+ => => exporting manifest sha256:87ca0260cfdcd056f267803844e8749ad2ae16bb7d141870111626f432d97bfe                                                                                                           0.0s
+ => => exporting config sha256:375d7db90c39b010366d8ee41dfd26469afd5e94c2672f4008568edf5e5ba1b5                                                                                                             0.0s
+ => => exporting attestation manifest sha256:80fb0097a24621dccecc954da8f426748260d4d6863a0a43dd672974b229005b                                                                                               0.1s
+ => => exporting manifest list sha256:550eb178a5518760f9668b765d67fb80bc19adc5af3fe24f1311b9a6cb182a2f                                                                                                      0.0s
+ => => naming to acr.azurecr.io/azure-connector:latest                                                                                                                                 0.0s
+ => => unpacking to ac.azurecr.io/azure-connector:latest                                                                                                                              0.0s
+az acr login --name acr
+Login Succeeded
+docker push acr.azurecr.io/azure-connector:latest
+The push refers to repository [acr.azurecr.io/azure-connector]
+ddfc5620ff70: Layer already exists
+003d908e509f: Layer already exists
+4250354b4fb7: Layer already exists
+974e7e336459: Layer already exists
+186e9837369c: Layer already exists
+c4c5f447179d: Layer already exists
+d389b3791c2e: Layer already exists
+0e55377ebe37: Layer already exists
+8fba90d6dcbd: Layer already exists
+332a782c04f4: Pushed
+da7039bb2113: Layer already exists
+17fe3a92262f: Layer already exists
+5420596c14ab: Layer already exists
+fe36fc382320: Layer already exists
+c24709eccb2a: Layer already exists
+a266312a92ef: Layer already exists
+latest: digest: sha256:550eb178a5518760f9668b765d67fb80bc19adc5af3fe24f1311b9a6cb182a2f size: 856
+PS C:\data_eng\házi\5\ci_cd>
+```
+### deploy-confluent:
+
+This target deploys the actual Confluent cluster on top of AKS:
+```python
+PS C:\data_eng\házi\5\ci_cd> make deploy-confluent
+kubectl apply -f k8s/confluent-platform.yaml
+zookeeper.platform.confluent.io/zookeeper created
+kafka.platform.confluent.io/kafka created
+connect.platform.confluent.io/connect created
+ksqldb.platform.confluent.io/ksqldb created
+controlcenter.platform.confluent.io/controlcenter created
+schemaregistry.platform.confluent.io/schemaregistry created
+```
+
+with the make status target I can check the actual status of the cluster creation:
+```python
+PS C:\data_eng\házi\5\ci_cd> make status
+kubectl get pods -o wide
+NAME                                  READY   STATUS     RESTARTS   AGE     IP             NODE                              NOMINATED NODE   READINESS GATES
+confluent-operator-7bc56ff8bf-8pxcr   1/1     Running    0          2d14h   10.244.0.230   aks-default-17594787-vmss000000   <none>           <none>
+connect-0                             0/1     Running    0          19s     10.244.0.112   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-0                           0/1     Init:0/1   0          20s     <none>         aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-1                           0/1     Init:0/1   0          20s     <none>         aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-2                           0/1     Init:0/1   0          20s     <none>         aks-default-17594787-vmss000000   <none>           <none>
+```
+
+### deploy-producer
+
+This target deploys the Producer-app on top of AKS:
+```python
+PS C:\data_eng\házi\5\ci_cd> make deploy-producer
+kubectl apply -f k8s/producer-app-data.yaml
+secret/kafka-client-config created
+statefulset.apps/elastic created
+service/elastic created
+kafkatopic.platform.confluent.io/elastic-0 created
+PS C:\data_eng\házi\5\ci_cd>
+```
+
+the cluster is up and running:
+```python
+PS C:\data_eng\házi\5\ci_cd> make status
+kubectl get pods -o wide
+NAME                                  READY   STATUS    RESTARTS   AGE     IP             NODE                              NOMINATED NODE   READINESS GATES
+confluent-operator-7bc56ff8bf-8pxcr   1/1     Running   0          2d14h   10.244.0.230   aks-default-17594787-vmss000000   <none>           <none>
+connect-0                             1/1     Running   0          5m47s   10.244.0.112   aks-default-17594787-vmss000000   <none>           <none>
+controlcenter-0                       1/1     Running   0          3m31s   10.244.0.57    aks-default-17594787-vmss000000   <none>           <none>
+elastic-0                             1/1     Running   0          3m28s   10.244.0.140   aks-default-17594787-vmss000000   <none>           <none>
+kafka-0                               1/1     Running   0          4m32s   10.244.0.66    aks-default-17594787-vmss000000   <none>           <none>
+kafka-1                               1/1     Running   0          4m32s   10.244.0.86    aks-default-17594787-vmss000000   <none>           <none>
+kafka-2                               1/1     Running   0          4m32s   10.244.0.33    aks-default-17594787-vmss000000   <none>           <none>
+ksqldb-0                              1/1     Running   0          3m31s   10.244.0.45    aks-default-17594787-vmss000000   <none>           <none>
+schemaregistry-0                      1/1     Running   0          3m30s   10.244.0.237   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-0                           1/1     Running   0          5m48s   10.244.0.190   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-1                           1/1     Running   0          5m48s   10.244.0.135   aks-default-17594787-vmss000000   <none>           <none>
+zookeeper-2                           1/1     Running   0          5m48s   10.244.0.77    aks-default-17594787-vmss000000   <none>           <none>
+```
+
+### port-forward-controlcenter:
+
+This target port forwarding to Control Center web UI from local machine:
+
+```python powershell -Command "Start-Process powershell -ArgumentList 'kubectl port-forward controlcenter-0 9021:9021 *> \$null'" ```
+
+![ci_gui](https://github.com/user-attachments/assets/d15a92ab-dc7f-4665-a1d8-b7f3c3021a06)
+
+### Port forward Kafka Connect
+
+This target port forwarding the topic:
+
+```python Start-Process powershell -WindowStyle Hidden -ArgumentList 'kubectl port-forward connect-0 8083:8083 *> $null' ```
+
+### create-topic:
+
+This target create Kafka topic with a name expedia.
+```python
+PS C:\data_eng\házi\5\ci_cd> make create-topic
+kubectl exec kafka-0 -c kafka -- bash -c "/usr/bin/kafka-topics --create --topic expedia --replication-factor 3 --partitions 3 --bootstrap-server kafka:9092"
+Created topic expedia.
+PS C:\data_eng\házi\5\ci_cd>
+```
+
+### fix-curl:
+
+This target removes the alias (It was already deleted, so there must arrive an error message):
+```python
+PS C:\data_eng\házi\5\ci_cd> make fix-curl
+Remove-Item alias:curl -Force
+process_begin: CreateProcess(NULL, Remove-Item alias:curl -Force, ...) failed.
+make (e=2): A rendszer nem talßlja a megadott fßjlt.
+make: *** [Makefile:76: fix-curl] Error 2
+PS C:\data_eng\házi\5\ci_cd>
+```
+
+### upload-connector:
+
+Uploading the connector file through the API:
+```python
+PS C:\data_eng\házi\5\ci_cd> make upload-connector
+powershell -Command "Invoke-RestMethod -Method Post -Uri http://localhost:8083/connectors -ContentType 'application/json' -Body (Get-Content -Raw -Path azure-source-cc.json)"
+
+name    config
+----    ------
+expedia @{topics=expedia; bootstrap.servers=kafka:9071; connector.class=io.confluent.connect.azure.blob.storage.AzureBlobSt...
+```
+Then I checked the messages in the GUI's expedia topic:
+
+![ci_exp](https://github.com/user-attachments/assets/fb519410-2706-4a71-b4a7-0223dd7c26b9)
+
+Also copied an entire message:
+```python
+{
+  "id": 2182638,
+  "date_time": "0000-00-00 00:00:00",
+  "site_name": 2,
+  "posa_container": null,
+  "user_location_country": 66,
+  "user_location_region": 448,
+  "user_location_city": 18390,
+  "orig_destination_distance": 899.5932,
+  "user_id": 47758,
+  "is_mobile": 0,
+  "is_package": 0,
+  "channel": 10,
+  "srch_ci": "2017-08-14",
+  "srch_co": "2017-08-16",
+  "srch_adults_cnt": 2,
+  "srch_children_cnt": 1,
+  "srch_rm_cnt": 1,
+  "srch_destination_id": 11373,
+  "srch_destination_type_id": 1,
+  "hotel_id": 42949672960
+}
 ```
 
 
