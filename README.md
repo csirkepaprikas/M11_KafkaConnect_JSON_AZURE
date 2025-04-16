@@ -1018,11 +1018,11 @@ create-topic:
 
 # 4. Delete alias
 fix-curl:
-	powershell -Command "Remove-Item alias:curl -Force"
+	Remove-Item alias:curl -Force
 
 # 5. Kafka Connect connector upload from JSON file
 upload-connector:
-	powershell -Command "curl -s -X POST -H 'Content-Type:application/json' --data @azure-source-cc.json http://localhost:8083/connectors"
+	powershell -Command "Invoke-RestMethod -Method Post -Uri http://localhost:8083/connectors -ContentType 'application/json' -Body (Get-Content -Raw -Path azure-source-cc.json)"
 ```
 
 I deleted/masked the sensitive informations in the outputs/screenshots.
