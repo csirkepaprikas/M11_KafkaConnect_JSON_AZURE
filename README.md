@@ -2,7 +2,7 @@
 ### Balázs Mikes
 
 #### github link:
-https://github.com/csirkepaprikas/M10_KafkaBasics_SQL_LOCAL.git
+https://github.com/csirkepaprikas/M11_KafkaConnect_JSON_AZURE.git
 
 Kafka Connect Homework
 
